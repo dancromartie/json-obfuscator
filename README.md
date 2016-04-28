@@ -10,25 +10,21 @@ pip install jsonpath-rw, see https://github.com/kennknowles/python-jsonpath-rw
 {
     "something": [{
         "scores": [{
-            "customer": {"attributes": {"ssn": 111223333} }
+            "customer": {"attributes": {"ssn": "494949494"}}
         }] 
     }],
     "byooroughReport": {
         "im": {
             "over": ["here", "im", "hard", "to", "get", {"to": ["111-22-4444"]}]
         }
+    },
+    "some_dict": {
+        "stuff": {
+            "over": ["here", 111223333, "hard", "to", "get", {"personalIdent": ["111-22-4444"]}]
+        },
+        "keep_part_of_me": "12345xxxx"
     }
 }
-```
-
-## Example config file
-
-Paths are jsonpaths, which get plugged into jsonpath_rw.  The value to the right of the first space 
-will replace the stuff at the path.
-
-```
-$..something..ssn OBFUSCATE
-$..byooroughReport DONTREALLYCARE
 ```
 
 ## Example python usage
@@ -36,80 +32,56 @@ $..byooroughReport DONTREALLYCARE
 ```
 import json
 import obfuscate
-file_json = json.loads(open("to_obfuscate.json", "rb").read())
-path_configs = obfuscate.read_configs("obfuscation_paths.txt")
-clean = obfuscate.obfuscate(file_json, path_configs)
+import re
+
+file_json = json.loads(open("to_obfuscate_example.json", "rb").read())
+
+path_configs = []
+path_configs.append({"path": "$..keep_part_of_me", "regex": "\d\d\d\d\dxxxx", "replace": "0000xxxx"})
+path_configs.append({"path": "$..some_dict.stuff", "regex": "\d\d\d-?\d\d-?\d\d\d\d", "replace": "999999999"})
+path_configs.append({"path": "$..byooroughReport", "func": lambda x: "I_DONT_CARE"})
+path_configs.append({"path": "$..ssn", "func": lambda x: re.sub('[0-4]', '5', x)})
+
+print "\nScrubbing this JSON: %s" % file_json
+print "\nScrubbing with paths: %s" % path_configs
+print "\nScrubbed JSON is: %s" % json.dumps(obfuscate.obfuscate(file_json, path_configs), indent=4)
 ```
 
 ## Output
 
 ```
 {
+    "some_dict": {
+        "keep_part_of_me": "0000xxxx",
+        "stuff": {
+            "over": [
+                "here",
+                999999999,
+                "hard",
+                "to",
+                "get",
+                {
+                    "personalIdent": [
+                        "999999999"
+                    ]
+                }
+            ]
+        }
+    },
     "something": [
         {
             "scores": [
                 {
                     "customer": {
                         "attributes": {
-                            "ssn": "OBFUSCATE"
+                            "ssn": "595959595"
                         }
                     }
                 }
             ]
         }
     ],
-    "byooroughReport": "DONTREALLYCARE"
+    "byooroughReport": "I_DONT_CARE"
 }
 ```
 
-# The 'nuclear option'
-
-A path config with replacement value of the form:
-
-```
-regex___<regex here>___<replacement here> 
-```
-
-will do a json.dumps on the stuff at that path (if possible), and then do a regex substitution, and then 
-json.loads it back up.
-
-For example, if we use the following config row:
-
-```
-$..some_dict.stuff regex___\d\d\d-?\d\d-?\d\d\d\d___SCARYNUMBERS
-```
-
-Then this json:
-
-```
-{
-    "some_dict": {
-        "stuff": {
-            "over": ["here", "111223333", "hard", "to", "get", {"personalIdent": ["111-22-4444"]}]
-        }
-    }
-}
-```
-
-Turns into:
-
-```
-{
-    "some_dict": {
-        "stuff": {
-            "over": [
-                "here",
-                "SCARYNUMBERS",
-                "hard",
-                "to",
-                "get",
-                {
-                    "personalIdent": [
-                        "SCARYNUMBERS"
-                    ]
-                }
-            ]
-        }
-    }
-}
-```

@@ -1,7 +1,7 @@
 {
     "something": [{
         "scores": [{
-            "customer": {"attributes": {"ssn": 111223333} }
+            "customer": {"attributes": {"ssn": "494949494"}}
         }] 
     }],
     "byooroughReport": {
@@ -11,7 +11,8 @@
     },
     "some_dict": {
         "stuff": {
-            "over": ["here", "111223333", "hard", "to", "get", {"personalIdent": ["111-22-4444"]}]
-        }
+            "over": ["here", 111223333, "hard", "to", "get", {"personalIdent": ["111-22-4444"]}]
+        },
+        "keep_part_of_me": "12345xxxx"
     }
 }

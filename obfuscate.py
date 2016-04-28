@@ -7,13 +7,13 @@ import sys
 def is_scalar(val):
     return isinstance(val, (int, float, basestring))
 
-def obfuscate(obj, path_list):
+def obfuscate(obj, path_configs):
     clean_object = None
     # We need to keep track of previous paths because sometimes I think it tries to replace on 
     # its replacements, so sometimes we need to stop it.
-    all_previous_paths = []
-    for path, replacement_value in path_list:
-        jsonpath_expr = parse(path)
+    for path_config in path_configs:
+        all_previous_paths = []
+        jsonpath_expr = parse(path_config["path"])
         for match in jsonpath_expr.find(obj):
             match_path = str(match.full_path)
             for prev_path in all_previous_paths:
@@ -22,26 +22,30 @@ def obfuscate(obj, path_list):
                              "  Maybe tone down the jsonpath?")
             all_previous_paths.append(match_path)
             feature_value = match.value
-            clean_object = change_value_at_path(match_path, replacement_value, obj)
+            clean_object = change_value_at_path(match_path, path_config, obj)
     return clean_object
 
 
-def change_value_at_path(path_string, new_value, obj):
+def change_value_at_path(path_string, path_config, obj):
     # Example path is 'sbcs.[0].scores.[0].customer.attributes.ssn'
     paths = path_string.split(".")
     if path_string == '':
-        if new_value.startswith("regex___"):
-            splitup = new_value.split("___", 2)
-            regex_pattern = splitup[1]
-            replacement = splitup[2]
+        if "regex" in path_config:
+            regex_pattern = path_config["regex"]
+            replacement = path_config["replace"]
             if not obj:
                 return obj
             else:
                 as_string = json.dumps(obj)
                 clean_string = re.sub(regex_pattern, replacement, as_string)
-                return json.loads(clean_string)
+                try:
+                    return json.loads(clean_string)
+                except:
+                    print "Tried to json load: %s" % clean_string
+                    print "JSON pre cleaning was: %s" % as_string
+                    raise
         else:
-            return new_value
+            return path_config["func"](obj)
     index = None
     path = paths[0]
     if path.startswith("[") and path.endswith("]"):
@@ -49,18 +53,5 @@ def change_value_at_path(path_string, new_value, obj):
     else:
         index = path
     new_path_string = ".".join(paths[1:])
-    obj[index] = change_value_at_path(new_path_string, new_value, obj[index])
+    obj[index] = change_value_at_path(new_path_string, path_config, obj[index])
     return obj
-
-
-def read_configs(file_path):
-    """
-    Gets a list of (path, replacement_value) tuples.
-    """
-    path_lines = open(file_path, "rb").readlines()
-    path_configs = []
-    for line in path_lines:
-        splitup = line.strip().split(" ")
-        assert len(splitup) == 2
-        path_configs.append((splitup[0], splitup[1]))
-    return path_configs

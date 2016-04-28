@@ -1,3 +1,0 @@
-$..something..ssn OBFUSCATE
-$..byooroughReport DONTREALLYCARE
-$..some_dict.stuff regex___\d\d\d-?\d\d-?\d\d\d\d___SCARYNUMBERS
