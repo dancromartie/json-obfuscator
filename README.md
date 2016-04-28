@@ -64,8 +64,13 @@ clean = obfuscate.obfuscate(file_json, path_configs)
 
 # The 'nuclear option'
 
-A path config with replacement value of the form regex___<regex here>___<replacement here> will 
-do a json.dumps on the stuff at that path (if possible), and then do a regex substitution, and then 
+A path config with replacement value of the form:
+
+```
+regex___<regex here>___<replacement here> 
+```
+
+will do a json.dumps on the stuff at that path (if possible), and then do a regex substitution, and then 
 json.loads it back up.
 
 For example, if we use the following config row:
