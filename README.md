@@ -6,6 +6,7 @@ https://github.com/kennknowles/python-jsonpath-rw
 
 ## Example input
 
+```
 {
     "something": [{
         "scores": [{
@@ -18,6 +19,7 @@ https://github.com/kennknowles/python-jsonpath-rw
         }
     }
 }
+```
 
 ## Example config file
 
