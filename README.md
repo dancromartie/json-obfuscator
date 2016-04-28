@@ -31,7 +31,7 @@ pip install jsonpath-rw, see https://github.com/kennknowles/python-jsonpath-rw
 
 ```
 import json
-import jsonobfuscate
+import jsonobfuscator
 import re
 
 file_json = json.loads(open("to_obfuscate_example.json", "rb").read())
@@ -45,7 +45,7 @@ path_configs.append({"path": "$..ssn", "func": lambda x: re.sub('[0-4]', '5', x)
 
 print "\nScrubbing this JSON: %s" % file_json
 print "\nScrubbing with paths: %s" % path_configs
-print "\nScrubbed JSON is: %s" % json.dumps(jsonobfuscate.obfuscate(file_json, path_configs), indent=4)
+print "\nScrubbed JSON is: %s" % json.dumps(jsonobfuscator.obfuscate(file_json, path_configs), indent=4)
 ```
 
 ## Output
