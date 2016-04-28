@@ -1,0 +1,12 @@
+{
+    "something": [{
+        "scores": [{
+            "customer": {"attributes": {"ssn": 111223333} }
+        }] 
+    }],
+    "byooroughReport": {
+        "im": {
+            "over": ["here", "im", "hard", "to", "get", {"to": ["111-22-4444"]}]
+        }
+    }
+}
