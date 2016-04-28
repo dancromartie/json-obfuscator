@@ -61,3 +61,50 @@ clean = obfuscate.obfuscate(file_json, path_configs)
     "byooroughReport": "DONTREALLYCARE"
 }
 ```
+
+# The 'nuclear option'
+
+A path config with replacement value of the form regex___<regex here>___<replacement here> will 
+do a json.dumps on the stuff at that path (if possible), and then do a regex substitution, and then 
+json.loads it back up.
+
+For example, if we use the following config row:
+
+```
+$..some_dict.stuff regex___\d\d\d-?\d\d-?\d\d\d\d___SCARYNUMBERS
+```
+
+Then this json:
+
+```
+{
+    "some_dict": {
+        "stuff": {
+            "over": ["here", "111223333", "hard", "to", "get", {"personalIdent": ["111-22-4444"]}]
+        }
+    }
+}
+```
+
+Turns into:
+
+```
+{
+    "some_dict": {
+        "stuff": {
+            "over": [
+                "here",
+                "SCARYNUMBERS",
+                "hard",
+                "to",
+                "get",
+                {
+                    "personalIdent": [
+                        "SCARYNUMBERS"
+                    ]
+                }
+            ]
+        }
+    }
+}
+```

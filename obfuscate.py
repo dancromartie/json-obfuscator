@@ -1,7 +1,11 @@
 from jsonpath_rw import jsonpath, parse
 
+import json
+import re
 import sys
 
+def is_scalar(val):
+    return isinstance(val, (int, float, basestring))
 
 def obfuscate(obj, path_list):
     clean_object = None
@@ -26,7 +30,18 @@ def change_value_at_path(path_string, new_value, obj):
     # Example path is 'sbcs.[0].scores.[0].customer.attributes.ssn'
     paths = path_string.split(".")
     if path_string == '':
-        return new_value
+        if new_value.startswith("regex___"):
+            splitup = new_value.split("___", 2)
+            regex_pattern = splitup[1]
+            replacement = splitup[2]
+            if not obj:
+                return obj
+            else:
+                as_string = json.dumps(obj)
+                clean_string = re.sub(regex_pattern, replacement, as_string)
+                return json.loads(clean_string)
+        else:
+            return new_value
     index = None
     path = paths[0]
     if path.startswith("[") and path.endswith("]"):
@@ -47,6 +62,5 @@ def read_configs(file_path):
     for line in path_lines:
         splitup = line.strip().split(" ")
         assert len(splitup) == 2
-        assert splitup[1] in ["DONTREALLYCARE", "OBFUSCATE"]
         path_configs.append((splitup[0], splitup[1]))
     return path_configs
