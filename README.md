@@ -1,5 +1,9 @@
 # json-obfuscator
 
+## Dependencies
+pip install jsonpath-rw
+https://github.com/kennknowles/python-jsonpath-rw
+
 ## Example input
 
 {
