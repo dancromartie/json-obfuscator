@@ -1,5 +1,6 @@
 from jsonpath_rw import jsonpath, parse
 
+import copy
 import json
 import re
 import sys
@@ -8,7 +9,9 @@ def is_scalar(val):
     return isinstance(val, (int, float, basestring))
 
 def obfuscate(obj, path_configs):
-    clean_object = None
+    if not path_configs:
+        sys.exit("You need at least one path config")
+    clean_object = obj
     # We need to keep track of previous paths because sometimes I think it tries to replace on 
     # its replacements, so sometimes we need to stop it.
     for path_config in path_configs:
@@ -22,11 +25,12 @@ def obfuscate(obj, path_configs):
                              "  Maybe tone down the jsonpath?")
             all_previous_paths.append(match_path)
             feature_value = match.value
-            clean_object = change_value_at_path(match_path, path_config, obj)
+            orig_obj = copy.deepcopy(obj)
+            clean_object = change_value_at_path(match_path, path_config, obj, orig_obj)
     return clean_object
 
 
-def change_value_at_path(path_string, path_config, obj):
+def change_value_at_path(path_string, path_config, obj, orig_obj):
     # Example path is 'sbcs.[0].scores.[0].customer.attributes.ssn'
     paths = path_string.split(".")
     if path_string == '':
@@ -45,7 +49,7 @@ def change_value_at_path(path_string, path_config, obj):
                     print "JSON pre cleaning was: %s" % as_string
                     raise
         else:
-            return path_config["func"](obj)
+            return path_config["func"](orig_obj, obj)
     index = None
     path = paths[0]
     if path.startswith("[") and path.endswith("]"):
@@ -53,5 +57,5 @@ def change_value_at_path(path_string, path_config, obj):
     else:
         index = path
     new_path_string = ".".join(paths[1:])
-    obj[index] = change_value_at_path(new_path_string, path_config, obj[index])
+    obj[index] = change_value_at_path(new_path_string, path_config, obj[index], orig_obj)
     return obj
