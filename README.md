@@ -13,7 +13,7 @@ pip install jsonpath-rw, see https://github.com/kennknowles/python-jsonpath-rw
             "customer": {"attributes": {"ssn": "494949494"}}
         }] 
     }],
-    "byooroughReport": {
+    "big_report": {
         "im": {
             "over": ["here", "im", "hard", "to", "get", {"to": ["111-22-4444"]}]
         }
@@ -39,7 +39,7 @@ file_json = json.loads(open("to_obfuscate_example.json", "rb").read())
 path_configs = []
 path_configs.append({"path": "$..keep_part_of_me", "regex": "\d\d\d\d\dxxxx", "replace": "0000xxxx"})
 path_configs.append({"path": "$..some_dict.stuff", "regex": "\d\d\d-?\d\d-?\d\d\d\d", "replace": "999999999"})
-path_configs.append({"path": "$..byooroughReport", "func": lambda x, y: "I_DONT_CARE"})
+path_configs.append({"path": "$..big_report", "func": lambda x, y: "i_dont_care"})
 path_configs.append({"path": "$..ssn", "func": lambda x, y: re.sub('[0-4]', '5', y)})
 
 
@@ -48,7 +48,7 @@ print "\nScrubbing with paths: %s" % path_configs
 print "\nScrubbed JSON is: %s" % json.dumps(jsonobfuscator.obfuscate(file_json, path_configs), indent=4)
 ```
 
-The lambda functions are functions that take a first argument of the origin json object that you 
+The lambda functions are functions that take a first argument of the original json object that you 
 are obfuscating.  The second argument is the value found at the path.  This can be useful if you 
 need to obfuscate depending on the details of the entire json object.
 
@@ -86,7 +86,7 @@ need to obfuscate depending on the details of the entire json object.
             ]
         }
     ],
-    "byooroughReport": "I_DONT_CARE"
+    "big_report": "i_dont_care"
 }
 ```
 
